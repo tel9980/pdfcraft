@@ -1,0 +1,43 @@
+name: Sync upstream
+
+on:
+  schedule:
+    # UTC 02:00 and 14:00 = Beijing 10:00 and 22:00
+    - cron: "0 2,14 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch upstream
+        run: |
+          git remote add upstream https://github.com/PDFCraftTool/pdfcraft.git || true
+          git fetch upstream main
+
+      - name: Merge and push
+        run: |
+          if git merge-base --is-ancestor upstream/main HEAD; then
+            echo "Already up to date, nothing to do."
+            exit 0
+          fi
+          git merge upstream/main --no-edit
+          git push origin main
