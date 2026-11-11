@@ -3,7 +3,7 @@ name: Sync upstream
 on:
   schedule:
     # UTC 02:00 and 14:00 = Beijing 10:00 and 22:00
-    - cron: "0 2,14 * * *"
+    - cron: "0 2 * * 1"
   workflow_dispatch:
 
 permissions:
